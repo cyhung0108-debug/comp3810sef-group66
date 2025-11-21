@@ -6,7 +6,7 @@ const methodOverride = require('method-override');
 const multer         = require('multer');
 const app            = express();
 
-mongoose.connect(process.env.MONGO_URI || 'mongodb://localhost:27017/blog');
+mongoose.connect('mongodb+srv://candy-108:candy0108@cluster0.4h5wsd3.mongodb.net/Blog?retryWrites=true&w=majority');
 
 
 app.use(express.urlencoded({ extended: true }));
@@ -58,3 +58,4 @@ app.use((err, req, res, next) => {
 const PORT = process.env.PORT || 3000;
 app.listen(PORT, () => console.log(`http://localhost:${PORT}`));
 app.get('/', (req, res) => res.redirect('/posts'));
+
