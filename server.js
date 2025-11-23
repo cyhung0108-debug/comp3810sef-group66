@@ -4,19 +4,30 @@ const mongoose       = require('mongoose');
 const session        = require('cookie-session');
 const methodOverride = require('method-override');
 const multer         = require('multer');
+const path           = require('path');
 const app            = express();
 
-mongoose.connect('mongodb+srv://candy-108:candy0108@cluster0.4h5wsd3.mongodb.net/Blog?retryWrites=true&w=majority');
+
+mongoose.connect('mongodb+srv://candy-108:candy0108@cluster0.4h5wsd3.mongodb.net/Blog?retryWrites=true&w=majority')
+  .then(() => console.log('MongoDB connected'))
+  .catch(err => console.error('MongoDB connection error:', err));
 
 
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 app.use(methodOverride('_method'));
 
+
 app.use(session({
+  name: 'session',
   secret: process.env.SESSION_SECRET || 'keyboardcat',
   resave: false,
-  saveUninitialized: false
+  saveUninitialized: false,
+  cookie: {
+    secure: process.env.NODE_ENV === 'production',
+    httpOnly: true,
+    maxAge: 24 * 60 * 60 * 1000
+  }
 }));
 
 
@@ -30,11 +41,13 @@ app.use((req, res, next) => {
 
 
 app.use((req, res, next) => {
-  console.log('>>> get request：', req.method, req.url, 'body=', req.body);
+  console.log('>>> Request:', req.method, req.url, 'body=', req.body);
   next();
 });
 
+
 app.set('view engine', 'ejs');
+app.set('views', path.join(__dirname, 'views'));
 
 
 const storage = multer.memoryStorage();
@@ -47,7 +60,8 @@ const upload = multer({
   }
 });
 
-app.use(express.static('public'));
+
+app.use(express.static(path.join(__dirname, 'public')));
 
 
 app.use('/api', require('./routes/api'));
@@ -59,11 +73,32 @@ app.use('/comments', upload.single('image'), require('./routes/comments'));
 app.get('/', (req, res) => res.redirect('/posts'));
 
 
-app.use((err, req, res, next) => {
-  console.error('>>> server error：', err.message);
-  console.error(err.stack);
-  res.status(500).send(err.message || 'Server error');
+app.get('/health', (req, res) => {
+  res.status(200).json({ 
+    status: 'OK', 
+    timestamp: new Date().toISOString()
+  });
 });
 
+
+app.use((req, res) => {
+  res.status(404).render('404', { 
+    title: 'Page Not Found',
+    user: null 
+  });
+});
+
+
+app.use((err, req, res, next) => {
+  console.error('>>> Server error:', err.message);
+  console.error(err.stack);
+  res.status(500).send('Something went wrong!');
+});
+
+
 const PORT = process.env.PORT || 3000;
-app.listen(PORT, () => console.log(Server running on http://localhost:${PORT}));
+
+
+app.listen(PORT, '0.0.0.0', () => {
+  console.log(Server running on http://0.0.0.0:${PORT});
+});
