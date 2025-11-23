@@ -9,8 +9,10 @@ const app            = express();
 mongoose.connect('mongodb+srv://candy-108:candy0108@cluster0.4h5wsd3.mongodb.net/Blog?retryWrites=true&w=majority');
 
 
+app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 app.use(methodOverride('_method'));
+
 app.use(session({
   secret: process.env.SESSION_SECRET || 'keyboardcat',
   resave: false,
@@ -43,9 +45,11 @@ const upload = multer({
 });
 
 app.use(express.static('public'));
+
+
+app.use('/api', require('./routes/api'));
 app.use('/', require('./routes/auth'));
 app.use('/posts', upload.array('image', 5), require('./routes/posts'));
-app.use('/api', require('./routes/api'));
 app.use('/comments', upload.single('image'), require('./routes/comments'));
 app.use('/', upload.single('image'), require('./routes/comments'));
 
@@ -56,6 +60,5 @@ app.use((err, req, res, next) => {
 });
 
 const PORT = process.env.PORT || 3000;
-app.listen(PORT, () => console.log(`http://localhost:${PORT}`));
-app.get('/', (req, res) => res.redirect('/posts'));
-
+app.listen(PORT, () => console.log(http://localhost:${PORT}));
+app.get('/', (req, res) => res.redirect('/posts'));s
