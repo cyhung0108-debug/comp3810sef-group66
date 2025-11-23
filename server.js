@@ -19,6 +19,7 @@ app.use(session({
   saveUninitialized: false
 }));
 
+
 app.use((req, res, next) => {
   if (req.session.flash) {
     res.locals.flash = req.session.flash;
@@ -27,12 +28,14 @@ app.use((req, res, next) => {
   next();
 });
 
+
 app.use((req, res, next) => {
   console.log('>>> get request：', req.method, req.url, 'body=', req.body);
   next();
 });
 
 app.set('view engine', 'ejs');
+
 
 const storage = multer.memoryStorage();
 const upload = multer({
@@ -51,7 +54,10 @@ app.use('/api', require('./routes/api'));
 app.use('/', require('./routes/auth'));
 app.use('/posts', upload.array('image', 5), require('./routes/posts'));
 app.use('/comments', upload.single('image'), require('./routes/comments'));
-app.use('/', upload.single('image'), require('./routes/comments'));
+
+
+app.get('/', (req, res) => res.redirect('/posts'));
+
 
 app.use((err, req, res, next) => {
   console.error('>>> server error：', err.message);
@@ -60,6 +66,4 @@ app.use((err, req, res, next) => {
 });
 
 const PORT = process.env.PORT || 3000;
-app.listen(PORT, () => console.log(http://localhost:${PORT}));
-app.get('/', (req, res) => res.redirect('/posts'));
-
+app.listen(PORT, () => console.log(Server running on http://localhost:${PORT}));
