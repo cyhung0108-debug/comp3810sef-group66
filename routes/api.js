@@ -15,7 +15,15 @@ router.post('/posts', async (req,res)=>{
 
 
 router.put('/posts/:id', async (req,res)=>{
-  const post = await Post.findByIdAndUpdate(req.params.id, req.body, {new:true});
+
+  const existing = await Post.findOne({ _id: req.params.id });
+  if (!existing) return res.status(404).json({ error: 'Post not found' });
+
+  const post = await Post.findOneAndUpdate(
+    { _id: req.params.id },
+    { title: req.body.title, body: req.body.body },
+    { new: true }
+  );
   res.json(post);
 });
 
